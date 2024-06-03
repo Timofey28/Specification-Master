@@ -1,14 +1,4 @@
 
-users {
-	id serial
-	login text
-	password text
-	surname text
-	name text
-	patronymic text
-	registration_date date
-}
-
 items {
 	id serial
 	title text
@@ -43,13 +33,11 @@ projects {
 }
 
 edit_permissions {
-	user_id int *> users.id
+	employee_id int *> employees.id
 	project_id int *> projects.id
 }
 
 we {
-	login text
-	password text
 	company text
 	address text
 	inn varchar(15)
@@ -57,4 +45,14 @@ we {
 	bank text
 	payment_account varchar(20)
 	bik varchar(9)
+}
+
+employees {
+	id serial
+	login text
+	password text
+	surname text
+	name text
+	patronymic text
+	registration_date date
 }
