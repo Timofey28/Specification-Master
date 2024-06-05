@@ -12,10 +12,10 @@ from app.pages.statement_form_strategies.selective import Selective
 
 
 class MenuStrategy(ABC):
-    def __init__(self, page: ft.Page, logging_level: int, db: Database, user_id: int = 1):
+    def __init__(self, page: ft.Page, db: Database, exit_function, user_id: int = 1):
         self.page = page
-        self.logging_level = logging_level
         self.db = db
+        self.exit_function = exit_function
         self.user_id = user_id
         self.current_section_index = 0
 
@@ -24,16 +24,8 @@ class MenuStrategy(ABC):
         self.right_side = None
         self.rail = None
 
-        logging.getLogger("httpx").setLevel(self.logging_level)
-
         self.header_properties = header_properties
         self.textfield_properties = textfield_properties
-
-        # Elements-links to other pages
-        self.button_logout = ft.IconButton(
-            icon=ft.icons.LOGOUT,
-            tooltip='Выйти из аккаунта',
-        )
 
         logging.debug('Initialized MenuStratagy object')
 
@@ -123,9 +115,9 @@ class MenuStrategy(ABC):
             return
 
         if e.control.data == 'automatic':
-            statement_former = StatementFormer(Automatic(self.page, self.db, self.logging_level, self.user_id, self._reload_menu))
+            statement_former = StatementFormer(Automatic(self.page, self.db, self.user_id, self._reload_menu))
         elif e.control.data == 'selective':
-            statement_former = StatementFormer(Selective(self.page, self.db, self.logging_level, self.user_id, self._reload_menu))
+            statement_former = StatementFormer(Selective(self.page, self.db, self.user_id, self._reload_menu))
         else:
             logging.error('Unknown statement form strategy')
             return

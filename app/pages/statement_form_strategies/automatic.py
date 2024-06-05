@@ -7,8 +7,8 @@ from app.pages.statement_form_strategies import StatementFormStrategy
 
 
 class Automatic(StatementFormStrategy):
-    def __init__(self, page: ft.Page, db: Database, logging_level: int, employee_id: int, out_function):
-        super().__init__(page, db, logging_level, employee_id, out_function)
+    def __init__(self, page: ft.Page, db: Database, employee_id: int, out_function):
+        super().__init__(page, db, employee_id, out_function)
         self.statement_data = {
             'items_info': pd.DataFrame(columns=['Товары', 'Кол-во', 'Цена', 'Сумма']),
             'buyer_info': get_buyer_info(),

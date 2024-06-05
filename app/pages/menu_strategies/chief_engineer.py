@@ -13,8 +13,8 @@ from ...utils import get_buyer_info, update_buyer_info
 
 class ChiefEngineer(MenuStrategy):
 
-    def __init__(self, page: ft.Page, logging_level: int, db: Database, user_id: int = 1):
-        super().__init__(page, logging_level, db, user_id)
+    def __init__(self, page: ft.Page, db: Database, exit_function, user_id: int = 1):
+        super().__init__(page, db, exit_function, user_id)
         self.account_button_submit = None
         self.account_sex = None
         self.account_patronymic = None
@@ -45,10 +45,9 @@ class ChiefEngineer(MenuStrategy):
         self.rail = ft.NavigationRail(
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
-            # extended=True,
             min_width=100,
             min_extended_width=400,
-            # leading=ft.FloatingActionButton(icon=ft.icons.CREATE, text="Add"),
+            leading=ft.FloatingActionButton(icon=ft.icons.LOGOUT, tooltip='Выйти из аккаунта', on_click=self.exit_function),
             group_alignment=0.0,
             destinations=[
                 ft.NavigationRailDestination(
@@ -88,7 +87,7 @@ class ChiefEngineer(MenuStrategy):
         # Upper bar of each section
         self.permanent_elements = ft.Row(
             controls=[
-                self.button_logout
+                # тут была кнопка выхода из аккаунта
             ],
             alignment=ft.MainAxisAlignment.END,
         )

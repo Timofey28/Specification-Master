@@ -109,6 +109,20 @@ class Database:
             })
         return projects
 
+    def get_employee_projects(self, employee_id: int) -> list[dict]:
+        self.cur.execute(f"SELECT * FROM get_employee_projects({employee_id});")
+        res = self.cur.fetchall()
+        projects = []
+        for project in res:
+            projects.append({
+                'id': project[0],
+                'title': project[1],
+                'deadline': project[2],
+                'provider_company': project[3],
+                'creation_date': project[4],
+            })
+        return projects
+
     def delete_project(self, project_id: int) -> None:
         self.cur.execute(f"SELECT delete_project({project_id});")
         self.conn.commit()

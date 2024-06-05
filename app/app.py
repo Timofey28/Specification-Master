@@ -25,14 +25,6 @@ class App:
         self.menu = None
         self.menu_specific_strategy = None
 
-        # Настройка логов
-        logging.basicConfig(
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            filename='info.log',
-            filemode='w',
-            level=logging.INFO
-        )
-
         # Создания файла для хранения информации о нас как о покупателе
         if not os.path.exists(PATH_TO_BUYER_INFO):
             with open(PATH_TO_BUYER_INFO, 'w') as file:
@@ -52,12 +44,11 @@ class App:
     def run(self):
         self.title = 'Авторизация'
         self.auth = Auth(self.page, logging.INFO)
-        self.menu = Menu(self.page, logging.INFO, self.db)
+        self.menu = Menu(self.page, self.db, self.button_menu_logout)
         self.menu_specific_strategy = self.menu.menu_strategy
 
         # Связь между страницами
         self.auth.button_submit.on_click = self.button_auth_submit
-        self.menu_specific_strategy.button_logout.on_click = self.button_menu_logout
 
         self.auth.load_page()
         # self.menu.load_page(1)  # debug mode

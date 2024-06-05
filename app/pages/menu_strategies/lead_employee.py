@@ -10,8 +10,8 @@ from ..edit_specification import EditSpecification
 
 class LeadEmployee(MenuStrategy):
 
-    def __init__(self, page: ft.Page, logging_level: int, db: Database, user_id: int = 1):
-        super().__init__(page, logging_level, db, user_id)
+    def __init__(self, page: ft.Page, db: Database, exit_function, user_id: int = 1):
+        super().__init__(page, db, exit_function, user_id)
 
 
     def load_page(self) -> None:
@@ -22,7 +22,7 @@ class LeadEmployee(MenuStrategy):
             extended=True,
             min_width=100,
             min_extended_width=400,
-            # leading=ft.FloatingActionButton(icon=ft.icons.CREATE, text="Add"),
+            leading=ft.FloatingActionButton(icon=ft.icons.LOGOUT, tooltip='Выйти из аккаунта', on_click=self.exit_function),
             group_alignment=0.0,
             destinations=[
                 ft.NavigationRailDestination(
@@ -47,7 +47,7 @@ class LeadEmployee(MenuStrategy):
         # Upper bar of each section
         self.permanent_elements = ft.Row(
             controls=[
-                self.button_logout
+                # тут была кнопка выхода из аккаунта
             ],
             alignment=ft.MainAxisAlignment.END,
         )
@@ -68,7 +68,7 @@ class LeadEmployee(MenuStrategy):
 
     def build_section_projects(self) -> None:
         header = ft.Text('Проекты', **self.header_properties)
-        projects = self.db.get_projects()
+        projects = self.db.get_employee_projects(self.user_id)
         project_list = ft.Card(
             content=ft.Container(
                 width=500,

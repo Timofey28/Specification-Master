@@ -10,10 +10,9 @@ class StatementFormStrategy(ABC):
     """
     Абстрактный класс стратегии формирования ведомости
     """
-    def __init__(self, page: ft.Page, db: Database, logging_level: int, employee_id: int, out_function):
+    def __init__(self, page: ft.Page, db: Database, employee_id: int, out_function):
         self.page = page
         self.db = db
-        self.logging_level = logging_level
         self.employee_id = employee_id
         self.out_function = out_function
         self.very_small_number = 1e-9
