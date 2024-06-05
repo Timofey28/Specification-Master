@@ -17,6 +17,7 @@ examples/
 # Data files
 *.txt
 *.docx
+*.json
 
 # Do not ignore!
 !db_code_for_erd.dbdesigner.net.txt

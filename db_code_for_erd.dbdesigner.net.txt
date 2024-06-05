@@ -37,16 +37,6 @@ edit_permissions {
 	project_id int *> projects.id
 }
 
-we {
-	company text
-	address text
-	inn varchar(15)
-	kpp varchar(9)
-	bank text
-	payment_account varchar(20)
-	bik varchar(9)
-}
-
 employees {
 	id serial
 	login text
@@ -54,5 +44,7 @@ employees {
 	surname text
 	name text
 	patronymic text
+	sex varchar(6)
 	registration_date date
 }
+

@@ -63,6 +63,22 @@ class Database:
         provider_id, provider_company = result[0]
         return provider_id, provider_company
 
+    def get_statement_providers_data(self, provider_ids: list[int]) -> list[dict]:
+        self.cur.execute(f"SELECT * FROM get_statement_providers_data(ARRAY{provider_ids}::INT[]);")
+        res = self.cur.fetchall()
+        statement_data = []
+        for data in res:
+            statement_data.append({
+                'company': data[0],
+                'address': data[1],
+                'inn': data[2],
+                'kpp': data[3],
+                'bank': data[4],
+                'payment_account': data[5],
+                'bik': data[6],
+            })
+        return statement_data
+
 
     ### Проекты ###
     def create_project(
@@ -153,7 +169,7 @@ class Database:
 
 
     ### Товары ###
-    def get_items(self, project_id: int) -> list[dict]:
+    def get_items(self, project_id: int = 0) -> list[dict]:
         self.cur.execute(f"SELECT * FROM get_items({project_id});")
         res = self.cur.fetchall()
         items = []
@@ -177,3 +193,19 @@ class Database:
         self.cur.execute(f"SELECT * FROM add_item('{title}', {article}, '{description}', {price});")
         self.conn.commit()
         return self.cur.fetchall()[0][0]
+
+    def get_statement_items_data(self, project_ids: list[int] = None) -> list[dict]:
+        if project_ids is None:
+            project_ids = []
+        self.cur.execute(f"SELECT * FROM get_statement_items_data(ARRAY{project_ids}::INT[]);")
+        res = self.cur.fetchall()
+        statement_data = []
+        for data in res:
+            statement_data.append({
+                'title': data[0],
+                'amount': data[1],
+                'price': data[2],
+                'cost': data[3],
+                'provider_id': data[4],
+            })
+        return statement_data

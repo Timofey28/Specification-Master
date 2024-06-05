@@ -48,3 +48,33 @@ BEGIN
     RETURN NEXT;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION get_statement_providers_data(p_providers_ids INT[])
+RETURNS TABLE (
+    company TEXT,
+    address TEXT,
+    inn VARCHAR(15),
+    kpp VARCHAR(9),
+    bank TEXT,
+    payment_account VARCHAR(20),
+    bik VARCHAR(9)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.company,
+        p.address,
+        p.inn,
+        p.kpp,
+        p.bank,
+        p.payment_account,
+        p.bik
+    FROM
+        providers p
+    WHERE
+        id = ANY(p_providers_ids)
+    ORDER BY
+        company;
+END;
+$$ LANGUAGE plpgsql;

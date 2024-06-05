@@ -52,6 +52,31 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION get_employee_projects(p_employee_id INT)
+RETURNS TABLE (
+    id INT,
+    title TEXT,
+    deadline DATE,
+    provider_company TEXT,
+    creation_date DATE
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT p.id, p.title, p.deadline, providers.company, p.creation_date
+    FROM
+        projects p, providers
+    WHERE
+        p.provider_id = providers.id AND p.id IN (
+            SELECT project_id
+            FROM edit_permissions
+            WHERE employee_id = p_employee_id
+        )
+    ORDER BY
+        title;
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION delete_project(p_project_id INT)
 RETURNS VOID AS $$
 BEGIN

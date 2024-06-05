@@ -1,9 +1,7 @@
 import flet as ft
-from flet_core.control_event import ControlEvent
 import logging
 
 from database import Database
-from .menu_strategies import MenuStrategy
 from .menu_strategies.chief_engineer import ChiefEngineer
 from .menu_strategies.lead_employee import LeadEmployee
 
@@ -39,4 +37,3 @@ class Menu:
         self.menu_strategy.button_logout.on_click = action_when_logout
 
         self.menu_strategy.load_page()
-

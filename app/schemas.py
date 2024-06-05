@@ -14,11 +14,6 @@ class ItemTile(ft.ListTile):
         super().__init__()
         self.page = page
         self.item = item
-        # self.id = items['id']
-        # self.article = item_article
-        # self.description = item_description
-        # self.price = int(item_price)
-        # self.amount = amount
         self.delete_function = delete_function
         self.max_description_length = 500
         self.very_small_number = 1e-9
@@ -88,9 +83,9 @@ class ItemTile(ft.ListTile):
             on_change=validate_amount
         )
         prev_val = self.item['amount']
-        button_delete = ft.IconButton(icon=ft.icons.DELETE, data=self.item['id'], on_click=self.delete_function)
-        button_plus = ft.IconButton(icon=ft.icons.PLUS_ONE, on_click=increase_by_one)
-        button_minus = ft.IconButton(icon=ft.icons.EXPOSURE_MINUS_1, on_click=decrease_by_one)
+        button_delete = ft.IconButton(icon=ft.icons.DELETE, data=self.item['id'], on_click=self.delete_function, tooltip='Убрать товар из спецификации')
+        button_plus = ft.IconButton(icon=ft.icons.PLUS_ONE, on_click=increase_by_one, tooltip='Увеличить количество на 1')
+        button_minus = ft.IconButton(icon=ft.icons.EXPOSURE_MINUS_1, on_click=decrease_by_one, tooltip='Уменьшить количество на 1')
         if self.item['amount'] == 1:
             button_minus.disabled = True
 

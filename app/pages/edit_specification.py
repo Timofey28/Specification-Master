@@ -1,3 +1,4 @@
+from time import sleep
 import flet as ft
 from flet_core.control_event import ControlEvent
 import logging
@@ -38,12 +39,63 @@ class EditSpecification:
         self.db.update_specification(self.project_id, items)
         self.out_function()
 
-    def __add_item_window(self, e: ControlEvent):
+    def __create_item_window(self, e: ControlEvent):
         item_adder = ItemAdder(self.page, self.db, self.items, self.__update_page)
         item_adder.load_page()
 
+    def __add_item_window(self, e: ControlEvent):
+        def close_anchor(e: ControlEvent):
+            nonlocal items
+            chosen_item = e.control.data
+            for i in items:
+                if i['id'] == chosen_item:
+                    chosen_item = i
+            new_item = {
+                'id': chosen_item['id'],
+                'title': chosen_item['title'],
+                'article': chosen_item['article'],
+                'description': chosen_item['description'],
+                'price': chosen_item['price'],
+                'amount': 1
+            }
+            self.items.append(new_item)
+            self.items.sort(key=lambda x: x['title'])
+            item_search_bar.close_view('')
+            sleep(0.1)
+            self.__update_page()
+
+        # Получаем товары, которые не в текущей спецификации
+        items = self.db.get_items()
+        current_project_item_ids = list(map(lambda x: x['id'], self.items))
+        items = [item for item in items if item['id'] not in current_project_item_ids]
+
+        header = ft.Text('Выбор товара', **header_properties)
+        item_search_bar = ft.SearchBar(
+            divider_color=ft.colors.AMBER,
+            bar_hint_text="Выбор товара...",
+            view_hint_text="Выберите товар из списка...",
+            controls=[ft.ListTile(
+                title=ft.Text(item['title']),
+                subtitle=ft.Text(f"Артикул: {item['article']}"),
+                data=item['id'],
+                on_click=close_anchor,
+            ) for item in items]
+        )
+        button_back = ft.ElevatedButton('Назад', on_click=lambda _: self.__update_page())
+
+        self.page.clean()
+        self.page.add(
+            ft.Column([
+                header,
+                item_search_bar,
+                button_back,
+            ])
+        )
+
     def __update_page(self):
-        button_add_item = ft.IconButton(ft.icons.ADD_CARD_SHARP, on_click=self.__add_item_window)
+        button_save_and_exit = ft.IconButton(ft.icons.ARROW_LEFT, tooltip='Сохранить и выйти', on_click=self.__save_and_exit)
+        button_create_item = ft.IconButton(ft.icons.ADD_CARD_SHARP, tooltip='Создать товар', on_click=self.__create_item_window)
+        button_add_item = ft.IconButton(ft.icons.PRODUCTION_QUANTITY_LIMITS, tooltip='Добавить существующий товар', on_click=self.__add_item_window)
         item_tiles = ft.Card(
             content=ft.Container(
                 content=ft.Column(
@@ -62,7 +114,7 @@ class EditSpecification:
         self.page.add(
             ft.Column([
                 self.header,
-                button_add_item,
+                ft.Row([button_save_and_exit, button_create_item, button_add_item]),
                 item_tiles,
                 self.button_save_and_exit
             ])

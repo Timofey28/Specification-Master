@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta, date
-from copy import deepcopy
+from datetime import date
 import flet as ft
 from flet_core.control_event import ControlEvent
 import logging
@@ -9,6 +8,7 @@ from . import MenuStrategy
 from ..edit_permissions import EditPermissions
 from ..edit_specification import EditSpecification
 from ...schemas import CustomDatePicker, CustomSearchBar
+from ...utils import get_buyer_info, update_buyer_info
 
 
 class ChiefEngineer(MenuStrategy):
@@ -41,8 +41,6 @@ class ChiefEngineer(MenuStrategy):
 
 
     def load_page(self) -> None:
-        self.page.clean()
-
         rail_padding = 10
         self.rail = ft.NavigationRail(
             selected_index=0,
@@ -65,7 +63,7 @@ class ChiefEngineer(MenuStrategy):
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.PRINT,
-                    label='Распечатать ведомость',
+                    label='Ведомость',
                     padding=rail_padding,
                 ),
                 ft.NavigationRailDestination(
@@ -95,6 +93,7 @@ class ChiefEngineer(MenuStrategy):
             alignment=ft.MainAxisAlignment.END,
         )
 
+        self.page.clean()
         self.build_section_projects()
 
 
@@ -105,7 +104,7 @@ class ChiefEngineer(MenuStrategy):
             match index:
                 case 0: self.build_section_projects()
                 case 1: self.build_section_create_project()
-                case 2: self.build_section_print_statement()
+                case 2: self._build_section_form_statement()
                 case 3: self.build_section_employees()
                 case 4: self.build_section_add_account()
                 case 5: self.build_section_settings()
@@ -148,7 +147,7 @@ class ChiefEngineer(MenuStrategy):
                 project_list
             ]
         )
-        self.reload_menu()
+        self._reload_menu()
 
 
     def __edit_permissions_window(self, e: ControlEvent) -> None:
@@ -212,7 +211,7 @@ class ChiefEngineer(MenuStrategy):
                 self.create_project_button_submit,
             ]
         )
-        self.reload_menu()
+        self._reload_menu()
 
 
     def __create_project(self, e: ControlEvent) -> None:
@@ -255,7 +254,7 @@ class ChiefEngineer(MenuStrategy):
         self.provider_payment_account = ft.TextField(label='Платежный аккаунт', **self.textfield_properties, on_change=self.__validate_provider_fields)
         self.provider_bik = ft.TextField(label='БИК', **self.textfield_properties, on_change=self.__validate_provider_fields)
 
-        self.provider_button_back = ft.ElevatedButton('Назад', on_click=self.reload_menu)
+        self.provider_button_back = ft.ElevatedButton('Назад', on_click=self._reload_menu)
         self.provider_button_submit = ft.ElevatedButton('Добавить', disabled=True, on_click=self.__return_to_creating_project_after_adding_provider)
 
         form = ft.Column(
@@ -300,6 +299,47 @@ class ChiefEngineer(MenuStrategy):
         payment_account = self.provider_payment_account.value
         bik = self.provider_bik.value
 
+        if not inn.isnumeric():
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. ИНН должен состоять из цифр'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not 10 <= len(inn) <= 15:
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. ИНН должен быть от 10 до 15 символов'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not kpp.isnumeric():
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. КПП должен состоять из цифр'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not len(kpp) == 9:
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. КПП должен состоять из 9 символов'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not payment_account.isnumeric():
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. Расчетный счет должен состоять из цифр'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not len(payment_account) == 20:
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. Расчетный счет должен состоять из 20 символов'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not bik.isnumeric():
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. БИК должен состоять из цифр'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+        if not len(bik) == 9:
+            self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. БИК должен состоять из 9 символов'), show_close_icon=True)
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+
         provider_details = {
             'company': company,
             'address': address,
@@ -324,11 +364,7 @@ class ChiefEngineer(MenuStrategy):
             self.create_project_custom_search_bar.value = provider_company
 
         # Return back to creating a project
-        self.reload_menu()
-
-
-    def build_section_print_statement(self) -> None:
-        pass
+        self._reload_menu()
 
 
     def build_section_employees(self) -> None:
@@ -361,7 +397,7 @@ class ChiefEngineer(MenuStrategy):
                 employee_list
             ]
         )
-        self.reload_menu()
+        self._reload_menu()
 
 
     def __edit_employee(self, e: ControlEvent) -> None:
@@ -408,7 +444,7 @@ class ChiefEngineer(MenuStrategy):
                 self.account_button_submit,
             ]
         )
-        self.reload_menu()
+        self._reload_menu()
 
 
     def __validate_account_fields(self, e: ControlEvent) -> None:
@@ -465,30 +501,103 @@ class ChiefEngineer(MenuStrategy):
             self.page.update()
 
         header = ft.Row([ft.Text('Настройки', **self.header_properties)])
+        button_theme_icon = ft.IconButton(ft.icons.LIGHT_MODE, tooltip='Сменить тему', on_click=change_theme)
         if self.page.theme_mode == ft.ThemeMode.DARK:
-            button_theme_icon = ft.IconButton(ft.icons.NIGHTLIGHT, on_click=change_theme)
-        else:
-            button_theme_icon = ft.IconButton(ft.icons.LIGHT_MODE, on_click=change_theme)
+            button_theme_icon.icon = ft.icons.NIGHTLIGHT
         app_theme = ft.Row([ft.Text('Тема приложения'), button_theme_icon])
+
+        # Ввод информации об организации
+        buyer_info = ft.OutlinedButton('Изменить информацию об организации', on_click=self.__change_buyer_info)
 
         self.content = ft.Column(
             controls=[
                 header,
-                app_theme
+                app_theme,
+                buyer_info,
             ]
         )
-        self.reload_menu()
+        self._reload_menu()
 
-    def reload_menu(self, e: ControlEvent = None):
-        self.page.clean()
-        self.right_side = ft.Column([self.permanent_elements, self.content])
-        self.page.add(
-            ft.Row(
-                [
-                    self.rail,
-                    ft.VerticalDivider(width=1),
-                    self.right_side
-                ],
-                expand=True,
+
+    def __change_buyer_info(self, e: ControlEvent):
+        def __save_buyer_info(e: ControlEvent):
+            if inn.value:
+                if not inn.value.isnumeric():
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. ИНН должен состоять из цифр'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+                if not 10 <= len(inn.value) <= 15:
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. ИНН должен быть от 10 до 15 символов'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+            if kpp.value:
+                if not kpp.value.isnumeric():
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. КПП должен состоять из цифр'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+                if not len(kpp.value) == 9:
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. КПП должен состоять из 9 символов'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+            if payment_account.value:
+                if not payment_account.value.isnumeric():
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. Расчетный счет должен состоять из цифр'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+                if not len(payment_account.value) == 20:
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. Расчетный счет должен состоять из 20 символов'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+            if bik.value:
+                if not bik.value.isnumeric():
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. БИК должен состоять из цифр'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+                if not len(bik.value) == 9:
+                    self.page.snack_bar = ft.SnackBar(content=ft.Text('Не удалось обновить данные. БИК должен состоять из 9 символов'), show_close_icon=True)
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                    return
+
+            update_buyer_info(
+                company.value,
+                address.value,
+                inn.value,
+                kpp.value,
+                bank.value,
+                payment_account.value,
+                bik.value
             )
-        )
+            self.build_section_settings()
+
+        info = get_buyer_info()
+
+        company = ft.TextField(label='Название организации', value=info['company'], **self.textfield_properties)
+        address = ft.TextField(label='Юридический адрес', value=info['address'], **self.textfield_properties)
+        inn = ft.TextField(label='ИНН', value=info['inn'], **self.textfield_properties)
+        kpp = ft.TextField(label='КПП', value=info['kpp'], **self.textfield_properties)
+        bank = ft.TextField(label='Банк', value=info['bank'], **self.textfield_properties)
+        payment_account = ft.TextField(label='Платежный аккаунт', value=info['payment_account'], **self.textfield_properties)
+        bik = ft.TextField(label='БИК', value=info['bik'], **self.textfield_properties)
+
+        button_back = ft.ElevatedButton('Назад', on_click=lambda _: self.build_section_settings())
+        button_save = ft.ElevatedButton('Сохранить', on_click=__save_buyer_info)
+
+        self.content = ft.Column([
+            company,
+            address,
+            inn,
+            kpp,
+            bank,
+            payment_account,
+            bik,
+            ft.Row([button_back, button_save])
+        ])
+        self._reload_menu()
